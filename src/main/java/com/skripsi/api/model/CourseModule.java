@@ -11,7 +11,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class CourseModule {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,6 +23,5 @@ public class CourseModule {
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<SubModule> subModules;
-
 }
 

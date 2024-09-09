@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -35,5 +36,17 @@ public class SubModule {
     @JsonManagedReference
     private List<Quiz> quizzes;
 
+    @Column(name = "order_number")
+    private Integer orderNumber;
+
+    @Transient
+    private boolean quizCompleted;
+
+    // Method to set completed materials count
+    @Setter
+    @Transient
+    private Integer completedMaterialsCount; // Change type to Integer for count
+
 }
+
 
