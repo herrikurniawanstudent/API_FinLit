@@ -49,8 +49,6 @@ public class AuthenticationService {
                 .token(jwtToken)
                 .firstname(user.getFirstname())
                 .build();
-
-
     }
 }
 

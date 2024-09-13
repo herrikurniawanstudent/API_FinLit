@@ -1,7 +1,9 @@
 package com.skripsi.api.service;
 
+import com.skripsi.api.model.CourseModule;
 import com.skripsi.api.model.Material;
 import com.skripsi.api.model.SubModule;
+import com.skripsi.api.model.User;
 import com.skripsi.api.repository.MaterialRepository;
 import com.skripsi.api.repository.SubModuleRepository;
 import com.skripsi.api.repository.UserProgressRepository;
@@ -21,6 +23,8 @@ public class MaterialService {
     private MaterialRepository materialRepository;
     @Autowired
     private SubModuleRepository subModuleRepository;
+    @Autowired
+    private ProgressService progressService;
 
     public Material createMaterial(Material material) {
         Long subModuleId = material.getSubModule().getId();
@@ -33,33 +37,21 @@ public class MaterialService {
         }
     }
 
-//    public Material getMaterialByIdAndTrackProgress(Long materialId, Long userId) {
-//        Material material = materialRepository.findById(materialId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-//
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-//
-//        UserProgress progress = userProgressRepository.findByUserAndMaterial(user, material)
-//                .orElse(new UserProgress());
-//
-//        progress.setUser(user);
-//        progress.setMaterial(material);
-//        progress.setCompleted(true);
-//        userProgressRepository.save(progress);
-//
-//        return material;
-//    }
-
-
-    public List<Material> getAllMaterials() {
-        return materialRepository.findAll();
-    }
-
-    public Material getMaterialById(Long id) {
-        return materialRepository.findById(id)
+    public Material getMaterialAndUpdateProgress(Long materialId, User user) {
+        // Fetch material by ID
+        Material material =  materialRepository.findById(materialId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // Get associated submodule and module
+        SubModule subModule = material.getSubModule();
+        CourseModule module = subModule.getModule();
+
+        // Update user progress
+        progressService.updateUserProgress(user, module, subModule, material, false);
+
+        return material;
     }
+
 
     public List<Material> getMaterialsBySubModuleId(Long subModuleId) {
         subModuleRepository.findById(subModuleId)
@@ -67,43 +59,6 @@ public class MaterialService {
         return materialRepository.findBySubModuleIdOrderByOrderNumberAsc(subModuleId);
     }
 
-    public Material updateMaterial(Long id, Material materialDetails) {
-        Material material = getMaterialById(id);
-        material.setName(materialDetails.getName());
-        material.setContent(materialDetails.getContent());
-        material.setOrderNumber(materialDetails.getOrderNumber());
-        return materialRepository.save(material);
-    }
 
-    public void deleteMaterial(Long id) {
-        Material material = getMaterialById(id);
-        materialRepository.delete(material);
-    }
-
-
-//    public boolean canAccessMaterial(Long userId, Long materialId) {
-//        Material material = materialRepository.findById(materialId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-//
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-//
-//        // Find the previous material based on the order number
-//        Optional<Material> previousMaterialOpt = materialRepository
-//                .findFirstBySubModuleAndOrderNumberLessThanOrderByOrderNumberDesc(
-//                        material.getSubModule(), material.getOrderNumber()
-//                );
-//
-//        // If no previous material exists, the current material is the first one
-//        if (previousMaterialOpt.isEmpty()) {
-//            return true;
-//        }
-//
-//        Material previousMaterial = previousMaterialOpt.get();
-//
-//        // Check if the previous material is completed
-//        Optional<UserProgress> progressOpt = userProgressRepository.findByUserAndMaterial(user, previousMaterial);
-//        return progressOpt.isPresent() && progressOpt.get().getCompleted();
-//    }
 
 }

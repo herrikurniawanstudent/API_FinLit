@@ -30,7 +30,7 @@ public class UserProgress {
 
     @ManyToOne
     @JoinColumn(name = "material_id")
-    private Material lastCompletedMaterial;  // The last completed material
+    private Material lastCompletedMaterial;
 
     @Column(name = "quiz_completed")
     private boolean quizCompleted;  // Whether the quiz for the submodule is completed or not

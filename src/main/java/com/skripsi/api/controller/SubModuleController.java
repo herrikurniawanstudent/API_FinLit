@@ -27,12 +27,6 @@ public class SubModuleController {
         return ResponseEntity.ok(subModules);
     }
 
-    @GetMapping
-    public ResponseEntity<List<SubModule>> getAllSubModules() {
-        List<SubModule> subModules = subModuleService.getAllSubModules();
-        return ResponseEntity.ok(subModules);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<SubModule> getSubModuleById(@PathVariable Long id) {
         SubModule subModule = subModuleService.getSubModuleById(id);

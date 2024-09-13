@@ -1,16 +1,11 @@
 package com.skripsi.api.controller;
-
-import com.skripsi.api.config.jwt.JwtService;
 import com.skripsi.api.model.CourseModule;
 import com.skripsi.api.model.User;
-import com.skripsi.api.repository.UserRepository;
 import com.skripsi.api.service.ModuleService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -27,18 +22,11 @@ public class ModuleController {
         return ResponseEntity.ok(createdModule);
     }
 
-//    @GetMapping
-//    public ResponseEntity<List<CourseModule>> getAllModulesWithCompletion() {
-//        List<CourseModule> modules = moduleService.getAllModules();
-//        return ResponseEntity.ok(modules);
-//    }
-
     @GetMapping
     public ResponseEntity<List<CourseModule>> getAllModulesWithProgress( @AuthenticationPrincipal User user) {
         List<CourseModule> modules = moduleService.getAllModulesWithProgress(user.getId());
         return ResponseEntity.ok(modules);
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<CourseModule> getModuleById(@PathVariable Long id) {

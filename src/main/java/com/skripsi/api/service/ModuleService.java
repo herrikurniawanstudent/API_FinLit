@@ -17,16 +17,10 @@ public class ModuleService {
     private ModuleRepository moduleRepository;
     @Autowired
     private UserProgressRepository userProgressRepository;
-    @Autowired
-    private UserRepository userRepository;
 
 
     public CourseModule createModule(CourseModule module) {
         return moduleRepository.save(module);
-    }
-
-    public List<CourseModule> getAllModules() {
-        return moduleRepository.findAll();
     }
 
 
@@ -52,13 +46,13 @@ public class ModuleService {
                     // Set quiz completion status
                     subModule.setQuizCompleted(userProgress.isQuizCompleted());
 
-                    // Get the last completed material ID (if available)
-                    Long lastCompletedMaterialId = userProgress.getLastCompletedMaterial() != null
-                            ? userProgress.getLastCompletedMaterial().getId()
+                    // Get the last completed material ID (if available) id or ordernumber?
+                    Integer lastCompletedMaterial = userProgress.getLastCompletedMaterial() != null
+                            ? userProgress.getLastCompletedMaterial().getOrderNumber()
                             : null;
 
                     // Set the count of completed materials based on the last completed material
-                    subModule.setCompletedMaterialsCount(getCompletedMaterialsCount(subModule, lastCompletedMaterialId));
+                    subModule.setCompletedMaterialsCount(lastCompletedMaterial);
                 }
             }
         }
@@ -66,12 +60,6 @@ public class ModuleService {
         return modules;
     }
 
-    private int getCompletedMaterialsCount(SubModule subModule, Long lastCompletedMaterialId) {
-        // Count materials that have IDs less than or equal to the last completed material's ID
-        return (int) subModule.getMaterials().stream()
-                .filter(material -> lastCompletedMaterialId != null && material.getId() <= lastCompletedMaterialId)
-                .count();
-    }
 
 
     public CourseModule getModuleById(Long id) {

@@ -18,9 +18,6 @@ public class QuizService {
     @Autowired
     private QuizRepository quizRepository;
 
-    @Autowired
-    private ProgressService progressService;
-
 
     public List<Quiz> getQuizzesBySubModuleId(Long subModuleId) {
         return quizRepository.findBySubModuleIdOrderByOrderNumberAsc(subModuleId);

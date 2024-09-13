@@ -28,10 +28,6 @@ public class SubModuleService {
         }
     }
 
-    public List<SubModule> getAllSubModules() {
-        return subModuleRepository.findAll();
-    }
-
     public SubModule getSubModuleById(Long id) {
         return subModuleRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }

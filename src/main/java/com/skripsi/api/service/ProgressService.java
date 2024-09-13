@@ -23,49 +23,33 @@ public class ProgressService {
     @Autowired
     private SubModuleRepository subModuleRepository;
 
-    // Retrieve user progress based on user and submodule
-    public Optional<UserProgress> getUserProgress(User user, SubModule subModule) {
-        return userProgressRepository.findByUserAndSubModule(user, subModule);
-    }
 
-    // Update the user's progress
-    public UserProgress updateUserProgress(User user, CourseModule module, SubModule subModule, Material material, boolean quizCompleted) {
-        // Find existing progress for the user and submodule
-        Optional<UserProgress> existingProgress = userProgressRepository.findByUserAndSubModule(user, subModule);
-
+    public void updateUserProgress(User user, CourseModule module, SubModule subModule, Material material, boolean quizCompleted) {
+        Optional<UserProgress> existingProgressOpt = userProgressRepository.findByUserAndSubModule(user, subModule);
         UserProgress progress;
 
-        // If progress exists, update it, otherwise create a new one
-        if (existingProgress.isPresent()) {
-            progress = existingProgress.get();
+        if (existingProgressOpt.isPresent()) {
+            progress = existingProgressOpt.get();
+
+            // Check if the new material's order number is greater than the current one
+            if (progress.getLastCompletedMaterial() == null ||
+                    material.getOrderNumber() > progress.getLastCompletedMaterial().getOrderNumber()) {
+                progress.setLastCompletedMaterial(material);
+            }
+
         } else {
             progress = new UserProgress();
-            progress.setUser(user); // Directly set the User object
-            progress.setModule(module); // Set the module
-            progress.setSubModule(subModule); // Set the submodule
+            progress.setUser(user);
+            progress.setModule(module);
+            progress.setSubModule(subModule);
+            progress.setLastCompletedMaterial(material);
+            progress.setQuizCompleted(quizCompleted);  // Set quiz completion status during new progress creation
         }
 
-        // Update progress with last completed material and quiz status
-        progress.setLastCompletedMaterial(material);
-        progress.setQuizCompleted(quizCompleted);
-
         // Save progress to the repository
-        return userProgressRepository.save(progress);
+        userProgressRepository.save(progress);
     }
 
-
-
-    // Check if all materials in the submodule are completed
-    private boolean checkIfAllMaterialsCompleted(SubModule subModule) {
-        return subModule.getMaterials().stream()
-                .allMatch(material -> material.getOrderNumber() <= subModule.getMaterials().size());
-    }
-
-    // Unlock the next submodule
-    private void unlockNextSubModule(SubModule subModule, UserProgress progress) {
-        subModuleRepository.findNextSubModule(subModule.getModule().getId(), subModule.getOrderNumber() + 1)
-                .ifPresent(nextSubModule -> progress.setSubModule(nextSubModule));
-    }
 
     // Mark quiz as completed
     public void markQuizCompleted(Long userId, Long subModuleId) {
