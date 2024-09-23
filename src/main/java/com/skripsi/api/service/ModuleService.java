@@ -1,8 +1,6 @@
 package com.skripsi.api.service;
 import com.skripsi.api.model.*;
-import com.skripsi.api.repository.ModuleRepository;
-import com.skripsi.api.repository.UserProgressRepository;
-import com.skripsi.api.repository.UserRepository;
+import com.skripsi.api.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,43 +14,49 @@ public class ModuleService {
     @Autowired
     private ModuleRepository moduleRepository;
     @Autowired
-    private UserProgressRepository userProgressRepository;
-
-
-    public CourseModule createModule(CourseModule module) {
-        return moduleRepository.save(module);
-    }
-
+    private MaterialProgressRepository materialProgressRepository;
+    @Autowired
+    private QuizProgressRepository quizProgressRepository;
 
     public List<CourseModule> getAllModulesWithProgress(Long userId) {
         // Fetch all modules
         List<CourseModule> modules = moduleRepository.findAll();
 
-        // Fetch user progress
-        List<UserProgress> userProgressList = userProgressRepository.findByUserId(userId);
+        // Fetch material progress
+        List<MaterialProgress> materialProgressList = materialProgressRepository.findByUserId(userId);
+
+        // Fetch quiz progress
+        List<QuizProgress> quizProgressList = quizProgressRepository.findByUserId(userId);
 
         // Merge progress data with module data
         for (CourseModule module : modules) {
             for (SubModule subModule : module.getSubModules()) {
-                // Find progress related to this submodule
-                Optional<UserProgress> progress = userProgressList.stream()
-                        .filter(up -> up.getSubModule().getId().equals(subModule.getId()))
+                // Find material progress related to this submodule
+                Optional<MaterialProgress> materialProgress = materialProgressList.stream()
+                        .filter(mp -> mp.getSubModule().getId().equals(subModule.getId()))
                         .findFirst();
 
-                // Add progress data to the submodule
-                if (progress.isPresent()) {
-                    UserProgress userProgress = progress.get();
+                // Add material progress data to the submodule
+                if (materialProgress.isPresent()) {
+                    MaterialProgress userMaterialProgress = materialProgress.get();
 
-                    // Set quiz completion status
-                    subModule.setQuizCompleted(userProgress.isQuizCompleted());
-
-                    // Get the last completed material ID (if available) id or ordernumber?
-                    Integer lastCompletedMaterial = userProgress.getLastCompletedMaterial() != null
-                            ? userProgress.getLastCompletedMaterial().getOrderNumber()
+                    // Get the last completed material's order number (if available)
+                    Integer lastCompletedMaterialOrderNumber = userMaterialProgress.getLastCompletedMaterial() != null
+                            ? userMaterialProgress.getLastCompletedMaterial().getOrderNumber()
                             : null;
 
-                    // Set the count of completed materials based on the last completed material
-                    subModule.setCompletedMaterialsCount(lastCompletedMaterial);
+                    // Set the count of completed materials based on the last completed material's order number
+                    subModule.setCompletedMaterialsCount(lastCompletedMaterialOrderNumber);
+                }
+
+                // Find quiz progress related to this submodule
+                Optional<QuizProgress> quizProgress = quizProgressList.stream()
+                        .filter(qp -> qp.getSubModule().getId().equals(subModule.getId()))
+                        .findFirst();
+
+                // Add quiz progress data to the submodule
+                if (quizProgress.isPresent()) {
+                    subModule.setQuizCompleted(quizProgress.get().isQuizCompleted());
                 }
             }
         }
@@ -60,22 +64,12 @@ public class ModuleService {
         return modules;
     }
 
-
+    public CourseModule createModule(CourseModule module) {
+        return moduleRepository.save(module);
+    }
 
     public CourseModule getModuleById(Long id) {
         return moduleRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    }
-
-    public CourseModule updateModule(Long id, CourseModule moduleDetails) {
-        CourseModule module = getModuleById(id);
-        module.setName(moduleDetails.getName());
-        module.setDescription(moduleDetails.getDescription());
-        return moduleRepository.save(module);
-    }
-
-    public void deleteModule(Long id) {
-        CourseModule module = getModuleById(id);
-        moduleRepository.delete(module);
     }
 }

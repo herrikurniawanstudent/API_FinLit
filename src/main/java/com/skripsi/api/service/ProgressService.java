@@ -1,9 +1,7 @@
 package com.skripsi.api.service;
 
 import com.skripsi.api.model.*;
-import com.skripsi.api.repository.MaterialRepository;
-import com.skripsi.api.repository.SubModuleRepository;
-import com.skripsi.api.repository.UserProgressRepository;
+import com.skripsi.api.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,20 +11,21 @@ import java.util.Optional;
 
 @Service
 public class ProgressService {
-
     @Autowired
-    private UserProgressRepository userProgressRepository;
-
+    private MaterialProgressRepository materialProgressRepository;
+    @Autowired
+    private QuizProgressRepository quizProgressRepository;
     @Autowired
     private MaterialRepository materialRepository;
-
+    @Autowired
+    private  UserRepository userRepository;
     @Autowired
     private SubModuleRepository subModuleRepository;
 
 
-    public void updateUserProgress(User user, CourseModule module, SubModule subModule, Material material, boolean quizCompleted) {
-        Optional<UserProgress> existingProgressOpt = userProgressRepository.findByUserAndSubModule(user, subModule);
-        UserProgress progress;
+    public void updateMaterialProgress(User user, CourseModule module, SubModule subModule, Material material) {
+        Optional<MaterialProgress> existingProgressOpt = materialProgressRepository.findByUserAndSubModule(user, subModule);
+        MaterialProgress progress;
 
         if (existingProgressOpt.isPresent()) {
             progress = existingProgressOpt.get();
@@ -38,25 +37,38 @@ public class ProgressService {
             }
 
         } else {
-            progress = new UserProgress();
+            progress = new MaterialProgress();
             progress.setUser(user);
             progress.setModule(module);
             progress.setSubModule(subModule);
             progress.setLastCompletedMaterial(material);
-            progress.setQuizCompleted(quizCompleted);  // Set quiz completion status during new progress creation
         }
 
-        // Save progress to the repository
-        userProgressRepository.save(progress);
+        materialProgressRepository.save(progress);
     }
 
 
     // Mark quiz as completed
     public void markQuizCompleted(Long userId, Long subModuleId) {
-        UserProgress progress = userProgressRepository.findByUserIdAndSubModuleId(userId, subModuleId)
-                .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Optional<QuizProgress> existingProgressOpt = quizProgressRepository.findByUserIdAndSubModuleId(userId, subModuleId);
+        QuizProgress progress;
+
+        if (existingProgressOpt.isPresent()) {
+            progress = existingProgressOpt.get();
+        } else {
+            progress = new QuizProgress();
+            progress.setUser(userRepository.findById(userId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")));
+            progress.setSubModule(subModuleRepository.findById(subModuleId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Submodule not found")));
+
+            // Fetch the module from the submodule and set it in the QuizProgress
+            CourseModule module = progress.getSubModule().getModule();
+            progress.setModule(module);
+        }
+
         progress.setQuizCompleted(true);
-        userProgressRepository.save(progress);
+        quizProgressRepository.save(progress);
     }
 }
 

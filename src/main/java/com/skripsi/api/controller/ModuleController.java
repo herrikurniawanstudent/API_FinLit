@@ -34,15 +34,4 @@ public class ModuleController {
         return ResponseEntity.ok(module);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<CourseModule> updateModule(@PathVariable Long id, @RequestBody CourseModule moduleDetails) {
-        CourseModule updatedModule = moduleService.updateModule(id, moduleDetails);
-        return ResponseEntity.ok(updatedModule);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteModule(@PathVariable Long id) {
-        moduleService.deleteModule(id);
-        return ResponseEntity.noContent().build();
-    }
 }

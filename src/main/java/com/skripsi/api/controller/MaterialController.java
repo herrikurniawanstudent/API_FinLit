@@ -18,11 +18,10 @@ public class MaterialController {
     @Autowired
     private ProgressService progressService;
 
-
-    @PostMapping
-    public ResponseEntity<Material> createMaterial(@RequestBody Material material) {
-        Material createdMaterial = materialService.createMaterial(material);
-        return ResponseEntity.ok(createdMaterial);
+    @GetMapping("/submodule/{subModuleId}")
+    public ResponseEntity<List<Material>> getMaterialsBySubModuleId(@PathVariable Long subModuleId) {
+        List<Material> materials = materialService.getMaterialsBySubModuleId(subModuleId);
+        return ResponseEntity.ok(materials);
     }
 
     @GetMapping("/{id}")
@@ -31,10 +30,10 @@ public class MaterialController {
         return ResponseEntity.ok(material);
     }
 
-    @GetMapping("/submodule/{subModuleId}")
-    public ResponseEntity<List<Material>> getMaterialsBySubModuleId(@PathVariable Long subModuleId) {
-        List<Material> materials = materialService.getMaterialsBySubModuleId(subModuleId);
-        return ResponseEntity.ok(materials);
+    @PostMapping
+    public ResponseEntity<Material> createMaterial(@RequestBody Material material) {
+        Material createdMaterial = materialService.createMaterial(material);
+        return ResponseEntity.ok(createdMaterial);
     }
 
 }

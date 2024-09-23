@@ -33,15 +33,4 @@ public class SubModuleController {
         return ResponseEntity.ok(subModule);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<SubModule> updateSubModule(@PathVariable Long id, @RequestBody SubModule subModuleDetails) {
-        SubModule updatedSubModule = subModuleService.updateSubModule(id, subModuleDetails);
-        return ResponseEntity.ok(updatedSubModule);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSubModule(@PathVariable Long id) {
-        subModuleService.deleteSubModule(id);
-        return ResponseEntity.noContent().build();
-    }
 }
