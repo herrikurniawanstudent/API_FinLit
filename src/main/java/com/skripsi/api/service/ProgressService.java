@@ -21,6 +21,8 @@ public class ProgressService {
     private  UserRepository userRepository;
     @Autowired
     private SubModuleRepository subModuleRepository;
+    @Autowired
+    private ExamProgressRepository examProgressRepository;
 
 
     public void updateMaterialProgress(User user, CourseModule module, SubModule subModule, Material material) {
@@ -69,6 +71,28 @@ public class ProgressService {
 
         progress.setQuizCompleted(true);
         quizProgressRepository.save(progress);
+    }
+
+
+    public void updateExamProgress(User user, boolean examCompleted, Integer lastScore, int totalPossibleScore) {
+        Optional<ExamProgress> existingProgressOpt = examProgressRepository.findByUserId(user.getId());
+        ExamProgress progress;
+
+        if (existingProgressOpt.isPresent()) {
+            progress = existingProgressOpt.get();
+        } else {
+            progress = new ExamProgress();
+            progress.setUser(user);
+        }
+
+        progress.setExamCompleted(examCompleted);
+        progress.setLastScore(lastScore);
+        progress.setTotalPossibleScore(totalPossibleScore);
+        examProgressRepository.save(progress);
+    }
+
+    public Optional<ExamProgress> getExamProgressByUserId(Long userId) {
+        return examProgressRepository.findByUserId(userId);
     }
 }
 
