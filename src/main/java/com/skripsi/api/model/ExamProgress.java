@@ -14,7 +14,7 @@ public class ExamProgress {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -23,7 +23,4 @@ public class ExamProgress {
 
     @Column(name = "last_score")
     private Integer lastScore;
-
-    @Column(name = "total_possible_score")
-    private Integer totalPossibleScore;
 }

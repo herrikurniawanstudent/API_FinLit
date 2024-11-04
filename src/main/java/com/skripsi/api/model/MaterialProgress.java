@@ -19,10 +19,6 @@ public class MaterialProgress {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "module_id", nullable = false)
-    private CourseModule module;
-
-    @ManyToOne
     @JoinColumn(name = "submodule_id", nullable = false)
     private SubModule subModule;
 

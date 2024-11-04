@@ -1,12 +1,15 @@
 package com.skripsi.api.service;
 
 import com.skripsi.api.model.*;
+import com.skripsi.api.model.dto.UserProgressDto;
 import com.skripsi.api.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -16,13 +19,72 @@ public class ProgressService {
     @Autowired
     private QuizProgressRepository quizProgressRepository;
     @Autowired
-    private MaterialRepository materialRepository;
-    @Autowired
     private  UserRepository userRepository;
     @Autowired
     private SubModuleRepository subModuleRepository;
     @Autowired
     private ExamProgressRepository examProgressRepository;
+    @Autowired
+    private ModuleService moduleService;
+
+
+    public List<UserProgressDto> getAllUsersProgress() {
+        List<User> users = userRepository.findAll();
+        List<UserProgressDto> userProgressList = new ArrayList<>();
+
+        // Calculate the total number of items (materials and quizzes) across all modules
+        int totalItems = 0;
+        List<SubModule> subModules = subModuleRepository.findAll();
+        for (SubModule subModule : subModules) {
+            totalItems += subModule.getMaterials().size();
+            totalItems += subModule.getQuizzes().size();
+        }
+
+        totalItems += 1;
+
+        for (User user : users) {
+            List<MaterialProgress> materialProgressList = materialProgressRepository.findByUserId(user.getId());
+            List<QuizProgress> quizProgressList = quizProgressRepository.findByUserId(user.getId());
+
+            // Retrieve the user's exam progress
+            Optional<ExamProgress> examProgressOpt = examProgressRepository.findByUserId(user.getId());
+            boolean examCompleted = examProgressOpt.map(ExamProgress::isExamCompleted).orElse(false);
+
+            UserProgressDto userProgressDto = new UserProgressDto(user.getId(), user.getFirstname());
+
+            int completedItems = 0;
+
+            // Iterate over each submodule's material progress for the user
+            for (MaterialProgress materialProgress : materialProgressList) {
+                int completedMaterialsCount = materialProgress.getLastCompletedMaterial() != null
+                        ? materialProgress.getLastCompletedMaterial().getOrderNumber()
+                        : 0;
+                completedItems += completedMaterialsCount;
+                userProgressDto.addMaterialProgress(materialProgress.getSubModule().getId(), completedMaterialsCount);
+            }
+
+            // Iterate over each submodule's quiz progress for the user
+            for (QuizProgress quizProgress : quizProgressList) {
+                if (quizProgress.isQuizCompleted()) {
+                    completedItems += quizProgress.getSubModule().getQuizzes().size();
+                }
+                userProgressDto.addQuizProgress(quizProgress.getSubModule().getId(), quizProgress.isQuizCompleted());
+            }
+
+            // Include exam progress in the calculation
+            if (examCompleted) {
+                completedItems += 1;
+            }
+
+            // Calculate and set the progress percentage
+            double progressPercentage = totalItems == 0 ? 0 : Math.round(((double) completedItems / totalItems) * 100);
+            userProgressDto.setOverallProgressPercentage(progressPercentage);
+
+            userProgressList.add(userProgressDto);
+        }
+
+        return userProgressList;
+    }
 
 
     public void updateMaterialProgress(User user, CourseModule module, SubModule subModule, Material material) {
@@ -41,13 +103,13 @@ public class ProgressService {
         } else {
             progress = new MaterialProgress();
             progress.setUser(user);
-            progress.setModule(module);
             progress.setSubModule(subModule);
             progress.setLastCompletedMaterial(material);
         }
 
         materialProgressRepository.save(progress);
     }
+
 
 
     // Mark quiz as completed
@@ -66,7 +128,6 @@ public class ProgressService {
 
             // Fetch the module from the submodule and set it in the QuizProgress
             CourseModule module = progress.getSubModule().getModule();
-            progress.setModule(module);
         }
 
         progress.setQuizCompleted(true);
@@ -74,7 +135,7 @@ public class ProgressService {
     }
 
 
-    public void updateExamProgress(User user, boolean examCompleted, Integer lastScore, int totalPossibleScore) {
+    public void updateExamProgress(User user, boolean examCompleted, Integer lastScore) {
         Optional<ExamProgress> existingProgressOpt = examProgressRepository.findByUserId(user.getId());
         ExamProgress progress;
 
@@ -85,9 +146,13 @@ public class ProgressService {
             progress.setUser(user);
         }
 
-        progress.setExamCompleted(examCompleted);
+        // Mark examCompleted as true only if lastScore > 75
+        if (lastScore != null && lastScore >= 75) {
+            progress.setExamCompleted(true);
+        } else {
+            progress.setExamCompleted(false);
+        }
         progress.setLastScore(lastScore);
-        progress.setTotalPossibleScore(totalPossibleScore);
         examProgressRepository.save(progress);
     }
 

@@ -1,5 +1,6 @@
 package com.skripsi.api.controller;
 import com.skripsi.api.model.Material;
+import com.skripsi.api.model.MaterialProgress;
 import com.skripsi.api.model.User;
 import com.skripsi.api.service.MaterialService;
 import com.skripsi.api.service.ProgressService;
@@ -14,9 +15,7 @@ import java.util.List;
 public class MaterialController {
 
     @Autowired
-    private MaterialService materialService;
-    @Autowired
-    private ProgressService progressService;
+    private MaterialService materialService;;
 
     @GetMapping("/submodule/{subModuleId}")
     public ResponseEntity<List<Material>> getMaterialsBySubModuleId(@PathVariable Long subModuleId) {

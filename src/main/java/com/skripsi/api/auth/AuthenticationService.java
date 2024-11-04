@@ -47,10 +47,14 @@ public class AuthenticationService {
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
         var jwtToken = jwtService.generateToken(user);
+
+        // Assume `user.getRole()` returns the role as a String, e.g., "ADMIN" or "USER"
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .firstname(user.getFirstname())
+                .role(String.valueOf(user.getRole())) // Set the role here
                 .build();
     }
+
 }
 

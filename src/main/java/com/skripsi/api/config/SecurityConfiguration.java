@@ -24,6 +24,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests()
                 .requestMatchers("/api/auth/**")
                 .permitAll()
+                .requestMatchers("/api/admin/**") // Protect admin-specific endpoints
+                .hasAuthority("ADMIN")
                 .anyRequest()
                 .authenticated()
                 .and()

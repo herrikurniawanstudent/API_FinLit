@@ -40,7 +40,7 @@ public class ExamController {
 
     @PostMapping("/complete")
     public ResponseEntity<String> completeExam(@AuthenticationPrincipal User user, @RequestBody ExamProgress examProgress) {
-        progressService.updateExamProgress(user, examProgress.isExamCompleted(), examProgress.getLastScore(), examProgress.getTotalPossibleScore());
+        progressService.updateExamProgress(user, examProgress.isExamCompleted(), examProgress.getLastScore());
         return ResponseEntity.ok("Exam progress updated successfully");
     }
 
