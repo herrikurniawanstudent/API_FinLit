@@ -11,6 +11,7 @@ public class UserProgressDto {
     private String userName;
     private List<MaterialProgressDto> materialProgressList = new ArrayList<>();
     private List<QuizProgressDto> quizProgressList = new ArrayList<>();
+    private Integer examLastScore;
     private double overallProgressPercentage;
 
     public UserProgressDto(Long userId, String userName) {

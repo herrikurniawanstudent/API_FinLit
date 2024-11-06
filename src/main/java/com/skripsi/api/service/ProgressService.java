@@ -25,8 +25,7 @@ public class ProgressService {
     @Autowired
     private ExamProgressRepository examProgressRepository;
     @Autowired
-    private ModuleService moduleService;
-
+    private PreTestProgressRepository preTestProgressRepository;
 
     public List<UserProgressDto> getAllUsersProgress() {
         List<User> users = userRepository.findAll();
@@ -49,7 +48,7 @@ public class ProgressService {
             // Retrieve the user's exam progress
             Optional<ExamProgress> examProgressOpt = examProgressRepository.findByUserId(user.getId());
             boolean examCompleted = examProgressOpt.map(ExamProgress::isExamCompleted).orElse(false);
-
+            System.out.println("ExamProgress for user " + user.getId() + ": " + examProgressOpt);
             UserProgressDto userProgressDto = new UserProgressDto(user.getId(), user.getFirstname());
 
             int completedItems = 0;
@@ -79,11 +78,66 @@ public class ProgressService {
             // Calculate and set the progress percentage
             double progressPercentage = totalItems == 0 ? 0 : Math.round(((double) completedItems / totalItems) * 100);
             userProgressDto.setOverallProgressPercentage(progressPercentage);
-
+            userProgressDto.setExamLastScore(examProgressOpt.map(ExamProgress::getLastScore).orElse(null));
             userProgressList.add(userProgressDto);
         }
 
         return userProgressList;
+    }
+
+    public UserProgressDto getUserProgressById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Calculate the total number of items (materials and quizzes) across all modules
+        int totalItems = 0;
+        List<SubModule> subModules = subModuleRepository.findAll();
+        for (SubModule subModule : subModules) {
+            totalItems += subModule.getMaterials().size();
+            totalItems += subModule.getQuizzes().size();
+        }
+
+        totalItems += 1;
+
+        List<MaterialProgress> materialProgressList = materialProgressRepository.findByUserId(user.getId());
+        List<QuizProgress> quizProgressList = quizProgressRepository.findByUserId(user.getId());
+
+        // Retrieve the user's exam progress
+        Optional<ExamProgress> examProgressOpt = examProgressRepository.findByUserId(user.getId());
+        boolean examCompleted = examProgressOpt.map(ExamProgress::isExamCompleted).orElse(false);
+        System.out.println("ExamProgress for user " + user.getId() + ": " + examProgressOpt);
+        UserProgressDto userProgressDto = new UserProgressDto(user.getId(), user.getFirstname());
+
+        int completedItems = 0;
+
+        // Iterate over each submodule's material progress for the user
+        for (MaterialProgress materialProgress : materialProgressList) {
+            int completedMaterialsCount = materialProgress.getLastCompletedMaterial() != null
+                    ? materialProgress.getLastCompletedMaterial().getOrderNumber()
+                    : 0;
+            completedItems += completedMaterialsCount;
+            userProgressDto.addMaterialProgress(materialProgress.getSubModule().getId(), completedMaterialsCount);
+        }
+
+        // Iterate over each submodule's quiz progress for the user
+        for (QuizProgress quizProgress : quizProgressList) {
+            if (quizProgress.isQuizCompleted()) {
+                completedItems += quizProgress.getSubModule().getQuizzes().size();
+            }
+            userProgressDto.addQuizProgress(quizProgress.getSubModule().getId(), quizProgress.isQuizCompleted());
+        }
+
+        // Include exam progress in the calculation
+        if (examCompleted) {
+            completedItems += 1;
+        }
+
+        // Calculate and set the progress percentage
+        double progressPercentage = totalItems == 0 ? 0 : Math.round(((double) completedItems / totalItems) * 100);
+        userProgressDto.setOverallProgressPercentage(progressPercentage);
+        userProgressDto.setExamLastScore(examProgressOpt.map(ExamProgress::getLastScore).orElse(null));
+
+        return userProgressDto;
     }
 
 
@@ -158,6 +212,31 @@ public class ProgressService {
 
     public Optional<ExamProgress> getExamProgressByUserId(Long userId) {
         return examProgressRepository.findByUserId(userId);
+    }
+
+public void updatePreTestProgress(User user, boolean preTestCompleted, Integer lastScore) {
+    Optional<PreTestProgress> existingProgressOpt = preTestProgressRepository.findByUserId(user.getId());
+    PreTestProgress progress;
+
+    if (existingProgressOpt.isPresent()) {
+        progress = existingProgressOpt.get();
+    } else {
+        progress = new PreTestProgress();
+        progress.setUser(user);
+    }
+
+    // Mark preTestCompleted as true only if lastScore > 75
+    if (lastScore != null && lastScore >= 75) {
+        progress.setPreTestCompleted(true);
+    } else {
+        progress.setPreTestCompleted(false);
+    }
+    progress.setLastScore(lastScore);
+    preTestProgressRepository.save(progress);
+}
+
+    public Optional<PreTestProgress> getPreTestProgressByUserId(Long userId) {
+        return preTestProgressRepository.findByUserId(userId);
     }
 }
 

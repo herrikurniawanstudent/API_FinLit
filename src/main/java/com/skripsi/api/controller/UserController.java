@@ -24,10 +24,4 @@ public class UserController {
         return user;
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("/admin-resource")
-    public ResponseEntity<String> getAdminResource() {
-        return ResponseEntity.ok("Admin-specific data");
-    }
-
 }
