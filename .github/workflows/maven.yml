@@ -53,3 +53,6 @@ jobs:
 
             # Start the app
             nohup java -jar /home/root/finlit/api-0.0.1-SNAPSHOT.jar > /dev/null 2>&1 &
+
+            # Wait to ensure the app has started
+            sleep 5
