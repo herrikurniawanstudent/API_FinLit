@@ -28,13 +28,17 @@ public class AuthenticationService {
                 .lastname(request.getLastname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .role(User.Role.USER) // Set the role here
                 .build();
         repository.save(user);
         var jwtToken = jwtService.generateToken(user);
+        // In your authenticate method
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .firstname(user.getFirstname())
+                .role(String.valueOf(user.getRole())) // Send role in response
                 .build();
+
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
