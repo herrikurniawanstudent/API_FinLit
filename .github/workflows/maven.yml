@@ -45,7 +45,7 @@ jobs:
             export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
             export SPRING_PROFILES_ACTIVE="${{ secrets.SPRING_PROFILES_ACTIVE }}"
 
-            pkill -f 'java -jar /home/root/finlit/api-0.0.1-SNAPSHOT.jar' || true
+            pkill -f 'java -jar /home/root/finlit/target/api-0.0.1-SNAPSHOT.jar' || true
 
             # Start the app
             nohup java -jar /home/root/finlit/target/api-0.0.1-SNAPSHOT.jar > /dev/null 2>&1 &
