@@ -16,7 +16,7 @@ services:
     image: api-skripsi # Replace with your actual Spring Boot app image name
     container_name: api-skripsi
     environment:
-        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jwt_security
+        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/finance-app
         SPRING_DATASOURCE_USERNAME: postgres
         SPRING_DATASOURCE_PASSWORD: password
     depends_on:
