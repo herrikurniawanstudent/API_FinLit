@@ -25,4 +25,8 @@ public class QuizProgress {
 
     @Column(name = "quiz_completed")
     private boolean quizCompleted;
+
+    @ManyToOne
+    @JoinColumn(name = "quiz_id", nullable = false)
+    private Quiz quiz; // Add this relationship
 }

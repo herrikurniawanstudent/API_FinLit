@@ -10,10 +10,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface QuizProgressRepository extends JpaRepository <QuizProgress, Long> {
+public interface QuizProgressRepository extends JpaRepository<QuizProgress, Long> {
+
     Optional<QuizProgress> findByUserAndSubModule(User user, SubModule subModule);
 
     Optional<QuizProgress> findByUserIdAndSubModuleId(Long userId, Long subModuleId);
 
     List<QuizProgress> findByUserId(Long userId);
+
+    // Add this method for your requirement
+    Optional<QuizProgress> findByUserIdAndQuizId(Long userId, Long quizId);
 }
+

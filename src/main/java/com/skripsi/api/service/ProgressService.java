@@ -26,6 +26,8 @@ public class ProgressService {
     private ExamProgressRepository examProgressRepository;
     @Autowired
     private PreTestProgressRepository preTestProgressRepository;
+    @Autowired
+    private LearningObjectiveRepository learningObjectiveRepository;
 
     public List<UserProgressDto> getAllUsersProgress() {
         List<User> users = userRepository.findAll();
@@ -179,14 +181,22 @@ public class ProgressService {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")));
             progress.setSubModule(subModuleRepository.findById(subModuleId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Submodule not found")));
-
-            // Fetch the module from the submodule and set it in the QuizProgress
-            CourseModule module = progress.getSubModule().getModule();
         }
 
         progress.setQuizCompleted(true);
         quizProgressRepository.save(progress);
+
+        // Check learning objectives for completion
+        List<LearningObjective> learningObjectives = learningObjectiveRepository.findBySubModuleId(subModuleId);
+        for (LearningObjective objective : learningObjectives) {
+            boolean isAchieved = objective.getQuizzes().stream()
+                    .allMatch(quiz -> quizProgressRepository.findByUserIdAndQuizId(userId, quiz.getId()).isPresent());
+            if (isAchieved) {
+                objective.setAchieved(true); // transient field update
+            }
+        }
     }
+
 
 
     public void updateExamProgress(User user, boolean examCompleted, Integer lastScore) {

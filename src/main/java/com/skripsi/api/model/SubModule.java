@@ -39,6 +39,11 @@ public class SubModule {
     @Column(name = "order_number")
     private Integer orderNumber;
 
+    @OneToMany(mappedBy = "subModule", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<LearningObjective> learningObjectives;
+
+
     @Transient
     private boolean quizCompleted;
 
