@@ -43,9 +43,9 @@ public class SubModule {
     @JsonManagedReference
     private List<LearningObjective> learningObjectives;
 
-
-    @Transient
-    private boolean quizCompleted;
+    @Setter
+    @Column(name = "quiz_completed")
+    private Boolean quizCompleted = false;
 
     // Method to set completed materials count
     @Setter

@@ -17,6 +17,8 @@ public interface QuizProgressRepository extends JpaRepository<QuizProgress, Long
     @Query("SELECT COUNT(qp) FROM QuizProgress qp WHERE qp.user.id = :userId AND qp.subModule.id = :subModuleId AND qp.quizCompleted = true")
     int countCompletedQuizzesByUserIdAndSubModuleId(@Param("userId") Long userId, @Param("subModuleId") Long subModuleId);
 
+    @Query("SELECT CASE WHEN COUNT(qp) > 0 THEN true ELSE false END FROM QuizProgress qp WHERE qp.user.id = :userId AND qp.quiz.id = :quizId AND qp.quizCompleted = true")
+    boolean isQuizCompletedForUser(Long userId, Long quizId);
 
     List<QuizProgress> findByUserId(Long userId);
 

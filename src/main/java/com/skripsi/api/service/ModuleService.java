@@ -48,16 +48,6 @@ public class ModuleService {
                     // Set the count of completed materials based on the last completed material's order number
                     subModule.setCompletedMaterialsCount(lastCompletedMaterialOrderNumber);
                 }
-
-                // Find quiz progress related to this submodule
-                Optional<QuizProgress> quizProgress = quizProgressList.stream()
-                        .filter(qp -> qp.getSubModule().getId().equals(subModule.getId()))
-                        .findFirst();
-
-                // Add quiz progress data to the submodule
-                if (quizProgress.isPresent()) {
-                    subModule.setQuizCompleted(quizProgress.get().isQuizCompleted());
-                }
             }
         }
 

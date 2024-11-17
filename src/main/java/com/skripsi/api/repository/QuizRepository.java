@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
     List<Quiz> findBySubModuleIdOrderByOrderNumberAsc(Long subModuleId);
+    long countBySubModuleId(Long subModuleId);
 }

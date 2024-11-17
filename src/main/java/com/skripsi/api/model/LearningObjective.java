@@ -33,6 +33,6 @@ public class LearningObjective {
     private List<Quiz> quizzes;
 
     @Transient
-    private boolean isAchieved;
+    private boolean quizCompleted;
 }
 

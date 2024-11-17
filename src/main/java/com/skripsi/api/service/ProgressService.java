@@ -175,26 +175,41 @@ public class ProgressService {
         SubModule subModule = quiz.getSubModule();
 
         QuizProgress progress = quizProgressRepository.findByUserIdAndQuizId(userId, quizId)
-                .orElse(new QuizProgress(userRepository.findById(userId)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")),
-                        subModule, quiz));
+                .orElse(new QuizProgress(
+                        userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")),
+                        subModule,
+                        quiz
+                ));
 
         progress.setQuizCompleted(true);
         quizProgressRepository.save(progress);
 
         if (isAllQuizzesCompleted(userId, subModule.getId())) {
-            // Mark the entire submodule's quizzes as complete
-            // Or add a field to submodule to store complete status
+            subModule.setQuizCompleted(true);
+            subModuleRepository.save(subModule);
         }
     }
+
 
     private boolean isAllQuizzesCompleted(Long userId, Long subModuleId) {
         return quizProgressRepository.countCompletedQuizzesByUserIdAndSubModuleId(userId, subModuleId) ==
                 quizRepository.countBySubModuleId(subModuleId);
     }
 
+    // In ProgressService.java
+    public List<LearningObjective> getLearningObjectivesWithQuizCompletion(Long userId, Long subModuleId) {
+        List<LearningObjective> objectives = subModuleRepository.findById(subModuleId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Submodule not found"))
+                .getLearningObjectives();
 
+        for (LearningObjective objective : objectives) {
+            boolean allQuizzesCompleted = objective.getQuizzes().stream()
+                    .allMatch(quiz -> quizProgressRepository.isQuizCompletedForUser(userId, quiz.getId()));
+            objective.setQuizCompleted(allQuizzesCompleted);
+        }
 
+        return objectives;
+    }
 
     public void updateExamProgress(User user, boolean examCompleted, Integer lastScore) {
         Optional<ExamProgress> existingProgressOpt = examProgressRepository.findByUserId(user.getId());
