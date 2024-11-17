@@ -4,11 +4,13 @@ package com.skripsi.api.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Entity
 @Table(name = "quiz_progress")
 @Data
 @NoArgsConstructor
+@RequiredArgsConstructor
 public class QuizProgress {
 
     @Id

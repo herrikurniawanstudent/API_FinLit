@@ -27,7 +27,7 @@ public class ProgressService {
     @Autowired
     private PreTestProgressRepository preTestProgressRepository;
     @Autowired
-    private LearningObjectiveRepository learningObjectiveRepository;
+    private QuizRepository quizRepository;
 
     public List<UserProgressDto> getAllUsersProgress() {
         List<User> users = userRepository.findAll();
@@ -169,33 +169,30 @@ public class ProgressService {
 
 
     // Mark quiz as completed
-    public void markQuizCompleted(Long userId, Long subModuleId) {
-        Optional<QuizProgress> existingProgressOpt = quizProgressRepository.findByUserIdAndSubModuleId(userId, subModuleId);
-        QuizProgress progress;
+    public void markQuizCompleted(Long userId, Long quizId) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz not found"));
+        SubModule subModule = quiz.getSubModule();
 
-        if (existingProgressOpt.isPresent()) {
-            progress = existingProgressOpt.get();
-        } else {
-            progress = new QuizProgress();
-            progress.setUser(userRepository.findById(userId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")));
-            progress.setSubModule(subModuleRepository.findById(subModuleId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Submodule not found")));
-        }
+        QuizProgress progress = quizProgressRepository.findByUserIdAndQuizId(userId, quizId)
+                .orElse(new QuizProgress(userRepository.findById(userId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")),
+                        subModule, quiz));
 
         progress.setQuizCompleted(true);
         quizProgressRepository.save(progress);
 
-        // Check learning objectives for completion
-        List<LearningObjective> learningObjectives = learningObjectiveRepository.findBySubModuleId(subModuleId);
-        for (LearningObjective objective : learningObjectives) {
-            boolean isAchieved = objective.getQuizzes().stream()
-                    .allMatch(quiz -> quizProgressRepository.findByUserIdAndQuizId(userId, quiz.getId()).isPresent());
-            if (isAchieved) {
-                objective.setAchieved(true); // transient field update
-            }
+        if (isAllQuizzesCompleted(userId, subModule.getId())) {
+            // Mark the entire submodule's quizzes as complete
+            // Or add a field to submodule to store complete status
         }
     }
+
+    private boolean isAllQuizzesCompleted(Long userId, Long subModuleId) {
+        return quizProgressRepository.countCompletedQuizzesByUserIdAndSubModuleId(userId, subModuleId) ==
+                quizRepository.countBySubModuleId(subModuleId);
+    }
+
 
 
 
