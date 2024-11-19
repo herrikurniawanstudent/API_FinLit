@@ -21,19 +21,20 @@ public class QuizController {
     private ProgressService progressService;
 
     @GetMapping("/submodule/{subModuleId}")
-    public List<Quiz> getQuizzesBySubModule(@PathVariable Long subModuleId) {
-        return quizService.getQuizzesBySubModuleId(subModuleId);
+    public ResponseEntity<List<Quiz>> getQuizzesBySubModule(@PathVariable Long subModuleId) {
+        List<Quiz> quizzes = quizService.getQuizzesBySubModuleId(subModuleId);
+        return ResponseEntity.ok(quizzes);
     }
 
     @PostMapping("/{subModuleId}/complete")
     public ResponseEntity<String> completeQuiz(@PathVariable Long subModuleId, @AuthenticationPrincipal User user) {
         progressService.markQuizCompleted(user.getId(), subModuleId);
-
         return ResponseEntity.ok("Quiz progress updated successfully");
     }
 
     @PostMapping
-    public Quiz createQuiz(@RequestBody Quiz quiz) {
-        return quizService.createQuiz(quiz);
+    public ResponseEntity<Quiz> createQuiz(@RequestBody Quiz quiz) {
+        Quiz createdQuiz = quizService.createQuiz(quiz);
+        return ResponseEntity.ok(createdQuiz);
     }
 }

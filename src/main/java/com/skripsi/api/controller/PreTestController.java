@@ -22,18 +22,21 @@ public class PreTestController {
     private PreTestService preTestService;
 
     @GetMapping
-    public List<PreTest> getAllPreTests() {
-        return preTestService.getAllPreTests();
+    public ResponseEntity<List<PreTest>> getAllPreTests() {
+        List<PreTest> preTests = preTestService.getAllPreTests();
+        return ResponseEntity.ok(preTests);
     }
 
     @GetMapping("/{id}")
-    public PreTest getPreTestById(@PathVariable Long id) {
-        return preTestService.getPreTestById(id);
+    public ResponseEntity<PreTest> getPreTestById(@PathVariable Long id) {
+        PreTest preTest = preTestService.getPreTestById(id);
+        return ResponseEntity.ok(preTest);
     }
 
     @PostMapping
-    public PreTest createPreTest(@RequestBody PreTest preTest) {
-        return preTestService.createPreTest(preTest);
+    public ResponseEntity<PreTest> createPreTest(@RequestBody PreTest preTest) {
+        PreTest createdPreTest = preTestService.createPreTest(preTest);
+        return ResponseEntity.ok(createdPreTest);
     }
 
     @PostMapping("/complete")

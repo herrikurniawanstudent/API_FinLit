@@ -4,6 +4,7 @@ import com.skripsi.api.model.LearningObjective;
 import com.skripsi.api.model.User;
 import com.skripsi.api.service.ProgressService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,9 +21,10 @@ public class LearningObjectiveController {
     private ProgressService progressService;
 
     @GetMapping("/submodule/{subModuleId}")
-    public List<LearningObjective> getLearningObjectivesWithQuizCompletion(
+    public ResponseEntity<List<LearningObjective>> getLearningObjectivesWithQuizCompletion(
             @PathVariable Long subModuleId,
             @AuthenticationPrincipal User user) {
-        return progressService.getLearningObjectivesWithQuizCompletion(user.getId(), subModuleId);
+        List<LearningObjective> learningObjectives = progressService.getLearningObjectivesWithQuizCompletion(user.getId(), subModuleId);
+        return ResponseEntity.ok(learningObjectives);
     }
 }

@@ -2,16 +2,13 @@ package com.skripsi.api.controller;
 
 import com.skripsi.api.model.Exam;
 import com.skripsi.api.model.ExamProgress;
-import com.skripsi.api.model.Quiz;
 import com.skripsi.api.model.User;
 import com.skripsi.api.service.ExamService;
 import com.skripsi.api.service.ProgressService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -24,18 +21,21 @@ public class ExamController {
     private ProgressService progressService;
 
     @GetMapping
-    public List<Exam> getAllExams () {
-        return examService.getAllFinalExams();
+    public ResponseEntity<List<Exam>> getAllExams() {
+        List<Exam> exams = examService.getAllFinalExams();
+        return ResponseEntity.ok(exams);
     }
 
     @GetMapping("/{id}")
-    public Exam getExamById (@PathVariable Long id) {
-        return examService.getExamById(id);
+    public ResponseEntity<Exam> getExamById(@PathVariable Long id) {
+        Exam exam = examService.getExamById(id);
+        return ResponseEntity.ok(exam);
     }
 
     @PostMapping
-    public Exam createExam (@RequestBody Exam exam) {
-        return examService.createFinalExam(exam);
+    public ResponseEntity<Exam> createExam(@RequestBody Exam exam) {
+        Exam createdExam = examService.createFinalExam(exam);
+        return ResponseEntity.ok(createdExam);
     }
 
     @PostMapping("/complete")

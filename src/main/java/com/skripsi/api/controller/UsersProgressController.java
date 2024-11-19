@@ -4,6 +4,7 @@ import com.skripsi.api.model.User;
 import com.skripsi.api.model.dto.UserProgressDto;
 import com.skripsi.api.service.ProgressService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,14 +20,16 @@ public class UsersProgressController {
 
     @Autowired
     private ProgressService progressService;
-    
+
     @GetMapping
-    public List<UserProgressDto> getAllUsersProgress() {
-        return progressService.getAllUsersProgress();
+    public ResponseEntity<List<UserProgressDto>> getAllUsersProgress() {
+        List<UserProgressDto> usersProgress = progressService.getAllUsersProgress();
+        return ResponseEntity.ok(usersProgress);
     }
 
     @GetMapping("/{userId}")
-    public UserProgressDto getUserProgressById(@PathVariable Long userId) {
-        return progressService.getUserProgressById(userId);
+    public ResponseEntity<UserProgressDto> getUserProgressById(@PathVariable Long userId) {
+        UserProgressDto userProgress = progressService.getUserProgressById(userId);
+        return ResponseEntity.ok(userProgress);
     }
 }
