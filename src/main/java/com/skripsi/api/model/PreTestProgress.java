@@ -11,13 +11,14 @@ public class PreTestProgress {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
-    private PreTest preTest;
-
+    @Column(name = "pre_test_completed")
     private boolean preTestCompleted;
+
+    @Column(name = "last_score")
     private Integer lastScore;
 
 }

@@ -107,7 +107,6 @@ public class ProgressService {
         // Retrieve the user's exam progress
         Optional<ExamProgress> examProgressOpt = examProgressRepository.findByUserId(user.getId());
         boolean examCompleted = examProgressOpt.map(ExamProgress::isExamCompleted).orElse(false);
-        System.out.println("ExamProgress for user " + user.getId() + ": " + examProgressOpt);
         UserProgressDto userProgressDto = new UserProgressDto(user.getId(), user.getFirstname());
 
         int completedItems = 0;
@@ -196,7 +195,6 @@ public class ProgressService {
                 quizRepository.countBySubModuleId(subModuleId);
     }
 
-    // In ProgressService.java
     public List<LearningObjective> getLearningObjectivesWithQuizCompletion(Long userId, Long subModuleId) {
         List<LearningObjective> objectives = subModuleRepository.findById(subModuleId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Submodule not found"))
@@ -236,26 +234,26 @@ public class ProgressService {
         return examProgressRepository.findByUserId(userId);
     }
 
-public void updatePreTestProgress(User user, boolean preTestCompleted, Integer lastScore) {
-    Optional<PreTestProgress> existingProgressOpt = preTestProgressRepository.findByUserId(user.getId());
-    PreTestProgress progress;
+    public void updatePreTestProgress(User user, boolean preTestCompleted, Integer lastScore) {
+        Optional<PreTestProgress> existingProgressOpt = preTestProgressRepository.findByUserId(user.getId());
+        PreTestProgress progress;
 
-    if (existingProgressOpt.isPresent()) {
-        progress = existingProgressOpt.get();
-    } else {
-        progress = new PreTestProgress();
-        progress.setUser(user);
-    }
+        if (existingProgressOpt.isPresent()) {
+            progress = existingProgressOpt.get();
+        } else {
+            progress = new PreTestProgress();
+            progress.setUser(user);
+        }
 
-    // Mark preTestCompleted as true only if lastScore > 75
-    if (lastScore != null && lastScore >= 75) {
-        progress.setPreTestCompleted(true);
-    } else {
-        progress.setPreTestCompleted(false);
+        // Mark preTestCompleted as true only if lastScore > 75
+        if (lastScore != null && lastScore >= 75) {
+            progress.setPreTestCompleted(true);
+        } else {
+            progress.setPreTestCompleted(false);
+        }
+        progress.setLastScore(lastScore);
+        preTestProgressRepository.save(progress);
     }
-    progress.setLastScore(lastScore);
-    preTestProgressRepository.save(progress);
-}
 
     public Optional<PreTestProgress> getPreTestProgressByUserId(Long userId) {
         return preTestProgressRepository.findByUserId(userId);

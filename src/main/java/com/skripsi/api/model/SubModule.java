@@ -50,7 +50,7 @@ public class SubModule {
     // Method to set completed materials count
     @Setter
     @Transient
-    private Integer completedMaterialsCount; // Change type to Integer for count
+    private Integer completedMaterialsCount;
 
 }
 
